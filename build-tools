@@ -1,0 +1,112 @@
+#! /bin/bash
+echo
+echo "==========================================================================="
+echo "    Copyright reserved by Rock Lee, any unauthorized publishing of this "
+echo "    software is illegal!"
+echo "==========================================================================="
+echo
+
+installlib(){
+liblist="android-tools-adb libpng12-dev libjpeg62-dev libtiff4-dev tesseract-ocr tesseract-ocr-eng imagemagick"
+
+for var in $liblist
+do
+echo "==>Install $var: "
+sudo apt-get install $var
+echo
+if [ $? != 0 ]
+then
+echo "   Lib installation failed in $var!"
+echo "   You may check the debug information above and try to solve it by yourself!"
+echo '   ╮(╯▽╰)╭'
+echo "   If it reminds you of lack of some libs, you may use the command below to install them!"
+echo "  sudo apt-get install [libname] "
+echo
+exit
+fi
+done
+#sudo pip3 install opencv-python
+echo "==>Libs have been build successfully!";echo
+}
+
+geterrorline(){
+temp=(`wc -l $root/debug.log`)
+logl=${temp[0]}
+i=1
+while [ $i -le $logl ]
+do
+line=(`awk "NR==$i{print}" $root/debug.log`)
+eline1=${line[2]}
+path=${line[0]}
+eline1=`sed 's/://' << Test
+$eline1
+Test`
+eline2=$[$eline1 - $linenow]
+sed -e "s%$eline1%$eline2%" -e "s%$path%${1}:%" << Test
+${line[*]}
+Test
+i=$[$i + 1]
+done
+}
+
+installlib
+
+# build tool
+root=`dirname $0`
+if [ $root = . ]
+then root=$PWD
+fi
+roots="${root}/src"
+cat $roots/frame > $root/run
+temp=(`wc -l $roots/frame`)
+linenow=$[${temp[0]} + 1]
+sudo chmod 777 $root/run
+
+echo >> $root/run
+cat $roots/basic.cfg >> $root/run
+bash -n $root/run 2> $root/debug.log
+if [ $? != 0 ]
+then 
+echo "Syntax error in $roots/basic.cfg!"
+geterrorline $roots/basic.cfg
+echo "Build Failed!"
+rm $root/run
+exit 
+fi
+temp=(`wc -l $roots/basic.cfg`)
+linenow=$[${temp[0]} + $linenow + 1]
+
+echo >> $root/run
+cat $roots/tappoint.cfg >> $root/run
+bash -n $root/run 2> $root/debug.log
+if [ $? != 0 ]
+then 
+echo "Syntax error in $roots/tappoint.cfg!"
+geterrorline $roots/tappoint.cfg
+echo "Build Failed!"
+rm $root/run
+exit 
+fi
+temp=(`wc -l $roots/tappoint.cfg`)
+linenow=$[${temp[0]} + $linenow + 1]
+
+echo >> $root/run
+cat $roots/action.cfg >> $root/run
+bash -n $root/run 2> $root/debug.log
+if [ $? != 0 ]
+then 
+echo "Syntax error in $roots/action.cfg!"
+geterrorline $roots/action.cfg
+echo "Build Failed!"
+rm $root/run
+exit 
+fi
+
+echo "==>Build Successfully!";echo
+echo "You may use \"lsusb\" to check if your phone has been normally connected! (There should be one line, which looks like \"Bus 001 Devices 056: ID 2717:0368\".)"
+echo
+echo "Before we can use the adb tools, some more steps need to be done!"
+echo "You may check the link showed below to know the steps:"
+echo "http://blog.csdn.net/loushuai/article/details/45565951"
+echo 
+

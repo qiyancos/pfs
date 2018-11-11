@@ -1,0 +1,15 @@
+    
+    Usage:   run -qp [turns]    : Use this script to get QP
+             run -exp [turns]   : Use this script to get Exp materials
+             run -other [turns] : Use this script to finish other battle
+    -> [turns] means how may turns you want to play!
+    
+    Sample: ./run -qp 60 
+    This commmand line means you want to play for 60 turns to get QP.
+	
+    You may add -c to the end of the command line if you are already in the
+    game and at the top scene of the game.
+	
+    You may add -cc to the end of the command line if you have just run this
+    script and want to continue playing with the same mode for more turns.
+    

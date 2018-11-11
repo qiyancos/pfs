@@ -1,0 +1,47 @@
+#! /bin/bash
+
+set -o errexit
+
+root=`dirname $0`
+if [ ${1}x = "--helpx" -o ${1}x = x -o ${1}x = -hx ]
+then 
+cat $root/src/Usage.txt
+exit
+fi
+
+cd $root
+mkdir -p ./png
+root=$PWD
+
+echo
+echo "ATTENTION: To run this script normally, your phone must be unlocked!"
+echo "If you have already unlocked your phone and connected correctly!"
+echo "You may enter [Y] to continue:"
+read startnow
+if [ ${startnow}x != Yx -a ${startnow}x != yx -a ${startnow}x != x ]
+then 
+exit
+fi
+
+cmdlist=("input tap " "input swipe " "input keyevent " "am start -n " "wm size"  "screencap -p /sdcard/a.png" " pull /sdcard/a.png $root/png/a.png")
+# some command lines
+tap=0;swipe=1;presskey=2;startapp=3;getsize=4;screencap=5;getpng=6;
+# some basic operations
+
+echo
+echo "==>Start ADB Tools And Initialize";echo
+# get basic information
+sudo adb kill-server
+sudo adb start-server
+devices=(`adb devices`)
+deviceid=${devices[4]}
+echo;echo "==>Get Your Device ID: $deviceid";echo
+adbnor="adb -s $deviceid "
+adbshell="$adbnor shell "
+temp=(`$adbshell ${cmdlist[$getsize]}`)
+screen=(`sed s/x/' '/ << Test
+${temp[2]}
+Test`)
+screenx=${screen[0]};screeny=${screen[1]}
+echo "==>Get Your Screen Size: $screenx x $screeny";echo
+
